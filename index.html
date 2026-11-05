@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Пользователи</title>
+  <title>Пользователи (Firebase)</title>
   <style>
     body { font: 16px sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
     form { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -26,65 +26,70 @@
   <p id="status" role="status"></p>
   <ul id="users"></ul>
 
+  <!-- Подключаем Firebase SDK модульно через CDN -->
+  <script type="module">
+    import { initializeApp } from "https://gstatic.com";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      query, 
+      orderBy, 
+      limit 
+    } from "https://gstatic.com";
 
-  <!-- <h1>Регистрация</h1>
-  <form id="register-form">
-    <input id="name" name="name" type="text" placeholder="Имя" required>
-    <input id="email" name="email" type="text" placeholder="Email" required>
-    <input id="password" name="pswdInput" type="text" placeholder="Пароль" required>
-    <button type="submit">Зарегистрироваться</button>
-  </form>
+    // ЗАМЕНИТЕ ЭТИ ДАННЫЕ НА ВАШИ ИЗ НАСТРОЕК ПРОЕКТА FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuu2e6VuYOzZdYdPHB2jmI8JMmQbOimE4",
+      authDomain: "testwebproject-b108e.firebaseapp.com",
+      projectId: "testwebproject-b108e",
+      storageBucket: "testwebproject-b108e.firebasestorage.app",
+      messagingSenderId: "421317461008",
+      appId: "1:421317461008:web:feee5f64aa56c00aaef695"
+    };
 
-  <h1>Вход</h1>
-  <form id="login-form">
-    <input id="name" name="name" type="text" placeholder="Имя" required>
-    <input id="email" name="email" type="text" placeholder="Email" required>
-    <input id="password" name="pswdInput" type="text" placeholder="Пароль" required>
-    <button type="submit">Зарегистрироваться</button>
-  </form> -->
-  <!-- SDK подключается через CDN; import и module не используются -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = 'https://qufrlcqlsctkdsmkhsqi.supabase.co';
-    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_j3_edwcCyvmGaAZR0dV6Nw_M_v5gkA6';
+    // Инициализация Firebase и Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const usersCollection = collection(db, "users");
 
-    const client = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
-
+    // Получение элементов UI
     const form = document.getElementById('user-form');
     const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
     const usersList = document.getElementById('users');
-    const emailInput = document.getElementById('email')
-    const passwordInput = document.getElementById('password')
     const status = document.getElementById('status');
 
+    // Функция загрузки пользователей
     async function loadUsers() {
       status.textContent = 'Загружаю…';
 
-      const { data, error } = await client
-        .from('users')
-        .select('id, name, email')
-        .order('id', { ascending: false })
-        .limit(100);
+      try {
+        // В Firebase Firestore нет дефолтного автоинкрементного ID, 
+        // поэтому мы можем сортировать по времени или выводить списком.
+        // Чтобы сортировка orderBy('name') работала без ошибок, в базе должен быть хотя бы 1 документ
+        const q = query(usersCollection, limit(100));
+        const querySnapshot = await getDocs(q);
 
-      if (error) {
+        usersList.replaceChildren();
+
+        querySnapshot.forEach((doc) => {
+          const user = doc.data();
+          const item = document.createElement('li');
+          // В качестве ID используется уникальный хэш документа Firebase (doc.id)
+          item.textContent = `ID: ${doc.id} — ${user.name ?? ''} (${user.email ?? ''})`;
+          usersList.appendChild(item);
+        });
+
+        status.textContent = `Загружено записей: ${querySnapshot.size}`;
+      } catch (error) {
         status.textContent = 'Ошибка загрузки: ' + error.message;
-        return;
       }
-
-      usersList.replaceChildren();
-
-      for (const user of data) {
-        const item = document.createElement('li');
-        item.textContent = `ID: ${user.id} — ${user.name ?? ''}`;
-        usersList.appendChild(item);
-      }
-
-      status.textContent = `Загружено записей: ${data.length}`;
     }
 
+    // Обработчик отправки формы
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -95,20 +100,25 @@
 
       status.textContent = 'Добавляю…';
 
-      const { error } = await client
-        .from('users')
-        .insert({ name, email, password });
+      try {
+        // Добавление нового документа в коллекцию "users"
+        await addDoc(usersCollection, {
+          name: name,
+          email: email,
+          password: password
+        });
 
-      if (error) {
+        nameInput.value = '';
+        emailInput.value = '';
+        passwordInput.value = '';
+        status.textContent = 'Пользователь добавлен.';
+        await loadUsers();
+      } catch (error) {
         status.textContent = 'Ошибка добавления: ' + error.message;
-        return;
       }
-
-      nameInput.value = '';
-      status.textContent = 'Пользователь добавлен.';
-      await loadUsers();
     });
 
+    // Первоначальный вызов загрузки
     loadUsers();
   </script>
 </body>
