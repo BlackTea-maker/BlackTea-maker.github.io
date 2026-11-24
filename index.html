@@ -1,125 +1,46 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html>
 <head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Пользователи (Firebase)</title>
-  <style>
-    body { font: 16px sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
-    form { display: flex; gap: 8px; margin-bottom: 16px; }
-    input, button { font: inherit; padding: 8px; }
-    input { flex: 1; }
-    li { margin: 8px 0; }
-    #status { min-height: 1.5em; }
-  </style>
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="flutter_application_1">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>flutter_application_1</title>
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <h1>Пользователи</h1>
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
 
-  <form id="user-form">
-    <input id="name" name="name" type="text" placeholder="Имя" required>
-    <input id="email" name="email" type="text" placeholder="Email" required>
-    <input id="password" name="pswdInput" type="text" placeholder="Пароль" required>
-    <button type="submit">Добавить</button>
-  </form>
-
-  <p id="status" role="status"></p>
-  <ul id="users"></ul>
-
-  <!-- Подключаем Firebase SDK модульно через CDN -->
-  <script type="module">
-    import { initializeApp } from "https://gstatic.com";
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      getDocs, 
-      query, 
-      orderBy, 
-      limit 
-    } from "https://gstatic.com";
-
-    // ЗАМЕНИТЕ ЭТИ ДАННЫЕ НА ВАШИ ИЗ НАСТРОЕК ПРОЕКТА FIREBASE
-    const firebaseConfig = {
-      apiKey: "AIzaSyDuu2e6VuYOzZdYdPHB2jmI8JMmQbOimE4",
-      authDomain: "testwebproject-b108e.firebaseapp.com",
-      projectId: "testwebproject-b108e",
-      storageBucket: "testwebproject-b108e.firebasestorage.app",
-      messagingSenderId: "421317461008",
-      appId: "1:421317461008:web:feee5f64aa56c00aaef695"
-    };
-
-    // Инициализация Firebase и Firestore
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const usersCollection = collection(db, "users");
-
-    // Получение элементов UI
-    const form = document.getElementById('user-form');
-    const nameInput = document.getElementById('name');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const usersList = document.getElementById('users');
-    const status = document.getElementById('status');
-
-    // Функция загрузки пользователей
-    async function loadUsers() {
-      status.textContent = 'Загружаю…';
-
-      try {
-        // В Firebase Firestore нет дефолтного автоинкрементного ID, 
-        // поэтому мы можем сортировать по времени или выводить списком.
-        // Чтобы сортировка orderBy('name') работала без ошибок, в базе должен быть хотя бы 1 документ
-        const q = query(usersCollection, limit(100));
-        const querySnapshot = await getDocs(q);
-
-        usersList.replaceChildren();
-
-        querySnapshot.forEach((doc) => {
-          const user = doc.data();
-          const item = document.createElement('li');
-          // В качестве ID используется уникальный хэш документа Firebase (doc.id)
-          item.textContent = `ID: ${doc.id} — ${user.name ?? ''} (${user.email ?? ''})`;
-          usersList.appendChild(item);
-        });
-
-        status.textContent = `Загружено записей: ${querySnapshot.size}`;
-      } catch (error) {
-        status.textContent = 'Ошибка загрузки: ' + error.message;
-      }
-    }
-
-    // Обработчик отправки формы
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const name = nameInput.value.trim();
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-      if (!name) return;
-
-      status.textContent = 'Добавляю…';
-
-      try {
-        // Добавление нового документа в коллекцию "users"
-        await addDoc(usersCollection, {
-          name: name,
-          email: email,
-          password: password
-        });
-
-        nameInput.value = '';
-        emailInput.value = '';
-        passwordInput.value = '';
-        status.textContent = 'Пользователь добавлен.';
-        await loadUsers();
-      } catch (error) {
-        status.textContent = 'Ошибка добавления: ' + error.message;
-      }
-    });
-
-    // Первоначальный вызов загрузки
-    loadUsers();
-  </script>
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
