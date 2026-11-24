@@ -1,52 +1,47 @@
-name: Flutter Build Web and APK
+name: Build and Deploy Flutter Web
+
 on:
   push:
     branches: [ "master" ]
+  workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./flutter_application_1
+
     steps:
-      # 1. Клонируем код
+      # 1. Клонируем репозиторий
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем Flutter (кеш включён для ускорения)
+      # 2. Устанавливаем Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      # 4. flutter create Web (результат появится в build/web)
-      - name: Build Web
-        run: flutter create .
-      # 3. Получаем зависимости
-      - name: Install dependencies
-        run: flutter pub get
 
-      # 4. Собираем Web (результат появится в build/web)
+      # 3. Собираем проект внутри папки flutter_application_1
       - name: Build Web
-        run: flutter build web
-      - name: Commit and Push build/web
+        working-directory: ./flutter_application_1
+        run: |
+          flutter create . --platforms=web
+          flutter pub get
+          flutter build web --base-href "/"
+
+      # 4. Копируем готовую сборку в корень репозитория
+      - name: Copy build to root
+        run: |
+          cp -rf flutter_application_1/build/web/* .
+
+      # 5. Коммитим и пушим все файлы в master
+      - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add build/web -f
-          git commit -m "Auto-build: update build/web [skip ci]" || echo "No changes to commit"
-          git push 
-
-      # 6. Собираем APK (результат появится в build/app/outputs/flutter-apk/)
-      #- name: Build APK
-      #  run: flutter build apk --release
-
-      # 7. Сохраняем APK как артефакт
-      #- name: Upload APK Artifact
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: android-apk
-      #    path: build/app/outputs/flutter-apk/app-release.apk
-      #    retention-days: 7
+          git config user.email "41898282+github-actions[bot]@://github.com"
+          git add .
+          git commit -m "Auto-deploy: update web build [skip ci]" || echo "No changes to commit"
+          git push
