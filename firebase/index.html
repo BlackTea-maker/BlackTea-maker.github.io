@@ -1,55 +1,145 @@
-import { initializeApp } from "firebase/app";
-import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  GithubAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
-} from "firebase/auth";
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Авторизация</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f2f5;
+    }
+    .box {
+      background: #fff;
+      padding: 24px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 280px;
+    }
+    input, button {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
 
-// Инициализация
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+<div class="box">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Пароль">
+  
+  <button id="btn-email-login">Войти по Email</button>
+  <button id="btn-email-reg" style="background: #5f6368;">Регистрация</button>
+  
+  <hr style="width: 100%; border: 0; border-top: 1px solid #eee;">
+  
+  <button id="btn-github" style="background: #24292e;">Войти через GitHub</button>
+  <button id="btn-google" style="background: #db4437;">Войти через Google</button>
+  <button onclick="window.location.href='/'" style="background: #9aa0a6; margin-top: 8px;">Назад</button>
+</div>
 
-// 1. Вход через Google
-const loginWithGoogle = async () => {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    console.log("Успешно:", result.user);
-  } catch (error) {
-    console.error("Ошибка Google:", error.message);
-  }
-};
+<script type="module">
+  // 1. Импорты адаптированы для работы в браузере без сборщика (CDN)
+  import { initializeApp } from "https://gstatic.com";
+  import { 
+    getAuth, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    GithubAuthProvider,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
+  } from "https://gstatic.com";
 
-// 2. Вход через GitHub
-const loginWithGithub = async () => {
-  const provider = new GithubAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    console.log("Успешно:", result.user);
-  } catch (error) {
-    console.error("Ошибка GitHub:", error.message);
-  }
-};
+  // 2. ОБЯЗАТЕЛЬНО вставьте сюда ваш firebaseConfig из настроек проекта Firebase
+  const firebaseConfig = {
+    apiKey: "ВАШ_API_KEY",
+    authDomain: "ВАШ_://firebaseapp.com",
+    projectId: "ВАШ_PROJECT_ID",
+    storageBucket: "ВАШ_ПРОЕКТ.firebasestorage.app",
+    messagingSenderId: "ВАШ_SENDER_ID",
+    appId: "ВАШ_APP_ID"
+  };
 
-// 3. Регистрация по Email/Password
-const registerWithEmail = async (email, password) => {
-  try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    console.log("Регистрация успешна:", result.user);
-  } catch (error) {
-    console.error("Ошибка регистрации:", error.message);
-  }
-};
+  // --- ВАШ ОРИГИНАЛЬНЫЙ КОД БЕЗ ИЗМЕНЕНИЙ ---
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-// 4. Вход по Email/Password
-const loginWithEmail = async (email, password) => {
-  try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    console.log("Вход успешен:", result.user);
-  } catch (error) {
-    console.error("Ошибка входа:", error.message);
-  }
-};
+  // 1. Вход через Google
+  const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("Успешно:", result.user);
+    } catch (error) {
+      console.error("Ошибка Google:", error.message);
+    }
+  };
+
+  // 2. Вход через GitHub
+  const loginWithGithub = async () => {
+    const provider = new GithubAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("Успешно:", result.user);
+    } catch (error) {
+      console.error("Ошибка GitHub:", error.message);
+    }
+  };
+
+  // 3. Регистрация по Email/Password
+  const registerWithEmail = async (email, password) => {
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Регистрация успешна:", result.user);
+    } catch (error) {
+      console.error("Ошибка регистрации:", error.message);
+    }
+  };
+
+  // 4. Вход по Email/Password
+  const loginWithEmail = async (email, password) => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Вход успешен:", result.user);
+    } catch (error) {
+      console.error("Ошибка входа:", error.message);
+    }
+  };
+  // -----------------------------------------
+
+  // Привязка ваших функций к кнопкам HTML
+  document.getElementById("btn-google").onclick = loginWithGoogle;
+  document.getElementById("btn-github").onclick = loginWithGithub;
+  
+  document.getElementById("btn-email-reg").onclick = () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    registerWithEmail(email, password);
+  };
+
+  document.getElementById("btn-email-login").onclick = () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    loginWithEmail(email, password);
+  };
+</script>
+
+</body>
+</html>
