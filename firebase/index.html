@@ -1,0 +1,55 @@
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  GithubAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
+} from "firebase/auth";
+
+// Инициализация
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// 1. Вход через Google
+const loginWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    console.log("Успешно:", result.user);
+  } catch (error) {
+    console.error("Ошибка Google:", error.message);
+  }
+};
+
+// 2. Вход через GitHub
+const loginWithGithub = async () => {
+  const provider = new GithubAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    console.log("Успешно:", result.user);
+  } catch (error) {
+    console.error("Ошибка GitHub:", error.message);
+  }
+};
+
+// 3. Регистрация по Email/Password
+const registerWithEmail = async (email, password) => {
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    console.log("Регистрация успешна:", result.user);
+  } catch (error) {
+    console.error("Ошибка регистрации:", error.message);
+  }
+};
+
+// 4. Вход по Email/Password
+const loginWithEmail = async (email, password) => {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    console.log("Вход успешен:", result.user);
+  } catch (error) {
+    console.error("Ошибка входа:", error.message);
+  }
+};
